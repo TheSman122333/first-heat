@@ -39,6 +39,40 @@ workers = [
     )
 ]
 
+
+#heat wave examples
+print("\nHEAT WAVE EXAMPLES")
+
+for day in [1, 2, 3]:
+    sessions = [
+        Session(today - timedelta(days=i), 120, heat_wave=True)
+        for i in range(1, day)
+    ]
+
+    person = Person(
+        "Experienced", "worker",
+        experienced=True, sessions=sessions
+    )
+
+    plan = worker_plan(person, today, 480, heat_wave=True)
+
+    print(
+        "Experienced / Heat wave day:", day,
+        "/ Exposure:", plan["percent"], "%"
+    )
+
+
+#new worker on day 2 in a heat wave
+new_day_two = Person(
+    "New day 2", "worker",
+    sessions=[Session(today - timedelta(days=1), 120)]
+)
+
+plan = worker_plan(new_day_two, today, 480, heat_wave=True)
+
+print("New worker / Day 2, heat-wave day 1:", plan["percent"], "%")
+
+
 print("\nWORKER ACCLIMATIZATION")
 
 for person in workers:

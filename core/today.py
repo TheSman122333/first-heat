@@ -1,40 +1,38 @@
+"Get current-hour WBGT and today's peak for any saved city."
+
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 from core.rules import get_category
 
 
-DETROIT = ZoneInfo("America/Detroit")
-LATITUDE = 42.3314
-LONGITUDE = -83.0458
-SPORTS_REGION = 2
-WEATHER_SOURCE = "Open-Meteo hourly forecast"
+def utc_time(text):
 
-
-def utc_time(value):
-    "weather timestamps are UTC because weather.py requests GMT"
-
-    when = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    when = datetime.fromisoformat(
+        text.replace("Z", "+00:00")
+    )
 
     if when.tzinfo is None:
-        when = when.replace(tzinfo=timezone.utc)
+        return when.replace(tzinfo=timezone.utc)
 
     return when.astimezone(timezone.utc)
 
 
-def summarize_today(readings, now_utc=None, region=SPORTS_REGION):
-    "find the current hour and highest WBGT for today's local date"
+def summarize_today(readings, now_utc=None, location=None):
 
-    if now_utc is None:
-        now_utc = datetime.now(timezone.utc)
+    from storage import default_settings
+
+    location = location or default_settings()
+    now_utc = now_utc or datetime.now(timezone.utc)
 
     if now_utc.tzinfo is None:
-        raise ValueError("CURRENT TIME MUST INCLUDE A TIMEZONE")
+        raise ValueError("TIME NEEDS A TIMEZONE")
 
-    now_utc = now_utc.astimezone(timezone.utc)
-    local_today = now_utc.astimezone(DETROIT).date()
+    zone = ZoneInfo(location["timezone"])
 
-    current_hour = now_utc.replace(
+    local_date = now_utc.astimezone(zone).date()
+
+    current_hour = now_utc.astimezone(timezone.utc).replace(
         minute=0, second=0, microsecond=0
     )
 
@@ -43,75 +41,79 @@ def summarize_today(readings, now_utc=None, region=SPORTS_REGION):
 
     for reading in readings:
 
-        when_utc = utc_time(reading["time"])
-        local_time = when_utc.astimezone(DETROIT)
+        utc = utc_time(reading["time"])
+        local = utc.astimezone(zone)
 
-        if local_time.date() != local_today:
+        if local.date() != local_date:
             continue
 
-        today.append((local_time, reading))
+        today.append((local, reading))
 
-        #match in UTC to avoid confusion during dst
-        if when_utc == current_hour:
-            current = (local_time, reading)
+        if utc == current_hour:
+            current = (local, reading)
 
     if not today:
-        raise ValueError("NO FORECAST AVAILABLE")
+        raise ValueError("Missing daily weather for this location")
 
     if current is None:
-        raise ValueError("CURRENT HOUR IS MISSING FROM FORECAST")
+        raise ValueError("Missing current Detroit hour or chosen location hour")
 
     peak_time, peak = max(
         today,
         key=lambda item: item[1]["wbgt"]
     )
 
-    current_time, current_reading = current
+    current_time, hour = current
+    region = location["region"]
 
-    current_rules = get_category(
-        current_reading["wbgt"],
-        f"sports_{region}"
+    category = get_category(
+        hour["wbgt"], f"sports_{region}"
     )
 
-    peak_rules = get_category(
-        peak["wbgt"],
-        f"sports_{region}"
+    peak_category = get_category(
+        peak["wbgt"], f"sports_{region}"
     )
 
     return {
         "current_time": current_time,
-        "current_wbgt": current_reading["wbgt"],
-        "category": current_rules["category"],
-        "guidance": current_rules["guidance"],
+        "current_wbgt": hour["wbgt"],
+        "category": category["category"],
+        "guidance": category["guidance"],
         "peak_time": peak_time,
         "peak_wbgt": peak["wbgt"],
-        "peak_category": peak_rules["category"],
+        "peak_category": peak_category["category"],
         "region": region,
-        "weather_source": WEATHER_SOURCE,
-        "rule_source": current_rules["source"]
+        "weather_source": "Open-Meteo hourly forecast",
+        "rule_source": category["source"]
     }
 
 
-def fetch_today_summary():
-    "fetch the weather and calculate today's WBGT"
+def fetch_today_summary(location=None):
+    "fetch weather and calculate today's estimated WBGT"
 
     from core.weather import FORECAST_URL, get_weather_data
     from core.wbgt import calculate_hourly_wbgt
+    from storage import default_settings
 
-    #detroits local day overlaps UTC dates
-    #include yesterday so evening requests keep the full local day
+    default_location = location is None
+    location = location or default_settings()
+
+    #include previous UTC day to cover local time
     weather = get_weather_data(
-        LATITUDE,
-        LONGITUDE,
+        location["latitude"],
+        location["longitude"],
         FORECAST_URL,
         forecast_days=2,
         past_days=1
     )
 
-    hourly_wbgt = calculate_hourly_wbgt(
+    readings = calculate_hourly_wbgt(
         weather,
-        LATITUDE,
-        LONGITUDE
+        location["latitude"],
+        location["longitude"]
     )
 
-    return summarize_today(hourly_wbgt)
+    if default_location:
+        return summarize_today(readings)
+
+    return summarize_today(readings, location=location)

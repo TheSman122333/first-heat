@@ -1,5 +1,4 @@
-
-"HOME PAGE, Detroit only by default"
+#Homepage: a brief display of today
 
 import asyncio
 import flet as ft
@@ -7,7 +6,7 @@ import flet as ft
 from core.today import fetch_today_summary
 
 
-#colors for each heat category
+#colors
 CARD_COLORS = {
     "green": ("#E5F5E9", "#166534"),
     "yellow": ("#FFF4CC", "#795500"),
@@ -16,209 +15,100 @@ CARD_COLORS = {
     "black": ("#273244", "#FFFFFF")
 }
 
-DARK = "#172033"
 MUTED = "#64748B"
-BACKGROUND = "#F8FAFC"
+DARK = "#172033"
 
 
-def build_home(page):
+def build_home(page, settings):
 
-    page.bgcolor = BACKGROUND
+    location = ft.Text("", size=15, color=MUTED)
+    status = ft.Text("", color=MUTED)
 
-    #header
-    date_text = ft.Text(
-        "Today's conditions",
-        size=15,
-        color=MUTED
-    )
-
-    header = ft.Column(
-        controls=[
-            ft.Text(
-                "FirstHeat",
-                size=32,
-                weight=ft.FontWeight.BOLD,
-                color=DARK
-            ),
-            ft.Row(
-                controls=[
-                    ft.Icon(
-                        ft.Icons.LOCATION_ON_OUTLINED,
-                        size=17,
-                        color=MUTED
-                    ),
-                    ft.Text(
-                        "Detroit, Michigan",
-                        size=15,
-                        color=MUTED
-                    )
-                ],
-                spacing=4
-            ),
-            date_text
-        ],
-        spacing=5
-    )
-
-    #loading and errors
     loading = ft.Row(
         controls=[
-            ft.ProgressRing(width=22, height=22),
-            ft.Text(
-                "Loading forecast...",
-                color=MUTED
-            )
-        ],
-        spacing=12
+            ft.ProgressRing(width=20, height=20),
+            ft.Text("Loading forecast...")
+        ]
     )
 
-    error = ft.Text(
-        "",
-        color="#991B1B",
-        visible=False
-    )
+    error = ft.Text("", color="#991B1B", visible=False)
 
-    #current heat readings
-    hour = ft.Text(
-        "CURRENT CONDITIONS",
-        size=13,
-        weight=ft.FontWeight.W_600,
-        color="#166534"
-    )
+    #current WBGT
+    hour = ft.Text("CURRENT HOUR", size=13)
 
     temperature = ft.Text(
         "-- °F",
-        size=52,
-        weight=ft.FontWeight.BOLD,
-        color="#166534"
+        size=48,
+        weight=ft.FontWeight.BOLD
     )
 
     category = ft.Text(
         "",
-        size=19,
-        weight=ft.FontWeight.BOLD,
-        color="#166534"
+        size=20,
+        weight=ft.FontWeight.BOLD
     )
 
-    guidance = ft.Text(
-        "",
-        size=15,
-        color=DARK
-    )
-
-    #recommendations label
-    recommendations_label = ft.Text(
+    advice_label = ft.Text(
         "RECOMMENDATIONS",
         size=12,
-        weight=ft.FontWeight.W_600,
         color=MUTED
     )
 
-    #current heat card
+    guidance = ft.Text("", size=15)
+
     current_card = ft.Container(
         bgcolor=CARD_COLORS["green"][0],
         border_radius=20,
-        padding=25,
+        padding=24,
         visible=False,
         content=ft.Column(
             controls=[
                 hour,
                 temperature,
                 category,
-                ft.Container(
-                    height=1,
-                    bgcolor="#CBD5E1"
-                ),
-                recommendations_label,
+                ft.Divider(),
+                advice_label,
                 guidance
             ],
-            spacing=12
+            spacing=10
         )
     )
 
-
-    #todays highest WBGT
-    peak_temperature = ft.Text(
-        "-- °F",
-        size=29,
-        weight=ft.FontWeight.BOLD,
-        color=DARK
-    )
-
-    peak_time = ft.Text(
-        "",
-        size=14,
-        color=MUTED
-    )
-
-    peak_category = ft.Text(
-        "",
-        size=15,
-        weight=ft.FontWeight.W_600
-    )
+    #todays peak
+    peak_text = ft.Text("", size=17, color=DARK)
 
     peak_card = ft.Container(
         bgcolor="#FFFFFF",
         border_radius=20,
-        padding=24,
+        padding=22,
         visible=False,
         content=ft.Column(
             controls=[
-                ft.Row(
-                    controls=[
-                        ft.Icon(
-                            ft.Icons.TRENDING_UP,
-                            color=MUTED,
-                            size=20
-                        ),
-                        ft.Text(
-                            "Today's peak",
-                            size=17,
-                            weight=ft.FontWeight.W_600,
-                            color=DARK
-                        )
-                    ],
-                    spacing=10
+                ft.Text(
+                    "Today's peak",
+                    size=19,
+                    weight=ft.FontWeight.BOLD,
+                    color=DARK
                 ),
-                peak_temperature,
-                peak_time,
-                peak_category
-            ],
-            spacing=8
+                peak_text
+            ]
         )
     )
 
-    #sources and links
-    source = ft.Text(
-        "",
-        size=12,
-        color=MUTED,
+    source = ft.Text("", size=12, color=MUTED, visible=False)
+
+    guideline_link = ft.TextButton(
+        content="Regional heat guidelines",
         visible=False
     )
 
     weather_link = ft.TextButton(
-        content="Weather source",
+        content="Open-Meteo",
         url="https://open-meteo.com/"
     )
 
-    guidelines_link = ft.TextButton(
-        content="Heat guidelines",
-        url="https://www.recognizetorecover.org/environmental"
-    )
-
-    links = ft.Row(
-        controls=[
-            weather_link,
-            guidelines_link
-        ],
-        spacing=8,
-        wrap=True,
-        visible=False
-    )
-
-    #refresh button
     refresh_button = ft.Button(
-        content="Refresh forecast",
+        content="Refresh",
         icon=ft.Icons.REFRESH
     )
 
@@ -232,95 +122,79 @@ def build_home(page):
 
         busy = True
 
+        location.value = (
+            f"{settings['name']}, {settings['state']} "
+            f"· Sports region {settings['region']}"
+        )
+
         loading.visible = True
+        status.value = ""
         error.visible = False
         current_card.visible = False
         peak_card.visible = False
         source.visible = False
-        links.visible = False
+        guideline_link.visible = False
         refresh_button.disabled = True
 
         page.update()
 
         try:
-            #run weather fetching separately from the UI
-            today = await asyncio.to_thread(fetch_today_summary)
-
-            #convert to fahrenheit, round only for display
-            wbgt_f = today["current_wbgt"] * 9 / 5 + 32
-            peak_f = today["peak_wbgt"] * 9 / 5 + 32
+            #fetch without freezing the app
+            today = await asyncio.to_thread(
+                fetch_today_summary,
+                settings.copy()
+            )
 
             level = today["category"]
-            background, text_color = CARD_COLORS[level]
-
-            #update current conditions
-            date_text.value = (
-                f"{today['current_time']:%A, %B %d}"
-            )
+            background, ink = CARD_COLORS[level]
 
             hour.value = (
-                f"CURRENT CONDITIONS · "
-                f"{today['current_time']:%I:%M %p}"
+                f"CURRENT HOUR · {today['current_time']:%I:%M %p}"
             )
 
-            temperature.value = f"{wbgt_f:.1f} °F"
+            temperature.value = (
+                f"{today['current_wbgt'] * 9 / 5 + 32:.1f} °F"
+            )
+
             category.value = f"{level.title()} heat category"
             guidance.value = today["guidance"]
 
             current_card.bgcolor = background
 
-            hour.color = text_color
-            temperature.color = text_color
-            category.color = text_color
-            recommendations_label.color = (
-                "#E2E8F0" if level == "black" else MUTED
-            )
+            for item in (hour, temperature, category):
+                item.color = ink
 
             guidance.color = (
                 "#FFFFFF" if level == "black" else DARK
             )
 
+            advice_label.color = (
+                "#E2E8F0" if level == "black" else MUTED
+            )
+
             current_card.visible = True
 
-            #update todays peak
-            peak_temperature.value = f"{peak_f:.1f} °F"
-
-            peak_time.value = (
-                f"Expected at {today['peak_time']:%I:%M %p}"
-            )
-
-            peak_level = today["peak_category"]
-
-            peak_category.value = (
-                f"{peak_level.title()} heat category"
-            )
-
-            peak_category.color = (
-                "#1F2937" if peak_level == "black"
-                else CARD_COLORS[peak_level][1]
+            #peak
+            peak_text.value = (
+                f"{today['peak_wbgt'] * 9 / 5 + 32:.1f} °F "
+                f"at {today['peak_time']:%I:%M %p} "
+                f"· {today['peak_category'].title()}"
             )
 
             peak_card.visible = True
 
             #sources
             source.value = (
-                f"Open-Meteo · Liljegren WBGT estimate · "
-                f"Sports region {today['region']}"
+                f"{today['weather_source']} · Liljegren estimate"
             )
-
-            guidelines_link.url = today["rule_source"]
 
             source.visible = True
-            links.visible = True
+            guideline_link.url = today["rule_source"]
+            guideline_link.visible = True
+            status.value = "Updated · times shown locally"
 
         except Exception as exc:
-            #hide old readings if the forecast fails
-            error.value = (
-                "Could not load today's forecast. "
-                "Check your internet connection and try again.\n"
-                f"{exc}"
-            )
-
+            error.value = f"Could not load forecast: {exc}"
             error.visible = True
 
         finally:
@@ -332,19 +206,31 @@ def build_home(page):
 
     refresh_button.on_click = refresh
 
-    #full home layout
+    #home layout
     screen = ft.SafeArea(
         content=ft.Column(
             controls=[
-                header,
+                ft.Text(
+                    "FirstHeat",
+                    size=30,
+                    color=DARK,
+                    weight=ft.FontWeight.BOLD
+                ),
+                location,
+                status,
                 loading,
                 error,
                 current_card,
                 peak_card,
                 refresh_button,
-                ft.Container(height=1, bgcolor="#E2E8F0"),
                 source,
-                links,
+                ft.Row(
+                    controls=[
+                        weather_link,
+                        guideline_link
+                    ],
+                    wrap=True
+                ),
                 ft.Text(
                     "Estimated WBGT, not an on-site measurement. "
                     "Follow official guidance "
@@ -353,9 +239,8 @@ def build_home(page):
                     color=MUTED
                 )
             ],
-            spacing=20,
+            spacing=14,
             scroll=ft.ScrollMode.AUTO,
-            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
             expand=True
         )
     )

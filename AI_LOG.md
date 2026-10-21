@@ -90,3 +90,24 @@
 - Claude's help: Ran the Home data path against the live forecast and built the screen without opening a window. Pointed out: white-on-white peak category text on black days, a low-contrast label on the black card, sports region 2 still unconfirmed, raw error text shown to users. Flagged that my AI use was getting high. Explained in words only; did not edit app code.
 - What I did: Wrote core/today.py; redid views/home.py, about 90% myself.
 - Files Claude edited (if any): AI_LOG.md.
+
+## 2026-10-21: Web deployment, Git and GitHub
+- Tool: Claude Code
+- Problem: Wanted the app online for community feedback, plus Git and GitHub. Flet's web server also crashed on my laptop with the openapi_prefix error, even on fastapi 0.148.
+- Claude's help: Found that FastAPI removed openapi_prefix in 0.145.0, so 0.144.0 is the newest version that works with flet-web 1.0.4, and tested it in a throwaway folder before changing my environment. Checked that Vercel supports Python WebSockets, which Flet's web mode needs. Explained storage choices: no database; use Flet SharedPreferences, which stays on the user's device or browser. Created the deployment config, deployed to Vercel through my connected account (as the project's first deployment it went straight to the public address firstheat.vercel.app), set up Git and pushed to GitHub.
+- What I did: Approved each change and created the GitHub repository.
+- Files Claude edited (if any): app.py, pyproject.toml, .python-version, .vercelignore and .gitignore (all new, deployment/tooling only); requirements.txt (fastapi pin); CLAUDE.md (known issue 2 and tech stack). Also installed fastapi==0.144.0 in the firstheat env, ran git init, made the initial commit, pushed to github.com/TheSman122333/firstheat, and created the Vercel project "firstheat".
+
+## 2026-10-21: Day 3 screens and core logic (ChatGPT)
+- Tool: ChatGPT
+- Problem: Building Settings (city search and saved settings), the Plan view and its core logic.
+- AI's help: Minimal help with linting and small debugging across the Day 3 files. Conceptual help with how Settings should work and with the logic in core/plan.py (grouping hours by local day and finding lower-heat windows).
+- What I did: Wrote the Day 3 code: navigation in main.py, storage.py, core/geocoding.py, core/plan.py, the location changes in core/today.py, views/settings.py, views/plan.py and the Home updates, plus the heat-wave cases in daybyday/day2check.py.
+- Files the AI wrote: no whole files; only small fixes during linting and debugging.
+
+## 2026-10-21: Day 3 review
+- Tool: Claude Code
+- Problem: Asked Claude to check the Day 3 work.
+- Claude's help: Ran city search, today's summary and the 7-day plan for real cities (Phoenix and Honolulu) and built every screen without opening a window; checked the Flet 1.0 calls (SharedPreferences, Dropdown). Pointed out: the test-version note is still missing, raw error text is shown in three screens, there's no region reminder after changing city, the map link is unverified, core/today.py imports storage.py from outside core/, and the Plan shows a misleading message after 8 PM. Explained in words only; did not edit app code.
+- What I did: Disclosed my ChatGPT use for Day 3.
+- Files Claude edited (if any): AI_LOG.md.
