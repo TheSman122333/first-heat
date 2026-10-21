@@ -1,0 +1,8 @@
+requirements.txt
+CLAUDE.md
+AI_LOG.md
+ai_logs/
+daybyday/
+.vscode/
+pytest.ini
+**/__pycache__/

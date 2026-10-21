@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "notes": "Nationwide advisory heat-screening rules. Sports regions cross state lines. Estimated WBGT does not replace an on-site measurement. These do not override state or local requirements.",
+  "sports": {
+    "name": "U.S. Soccer / Korey Stringer Institute regional heat guidelines",
+    "metric": "wbgt",
+    "source": "https://www.recognizetorecover.org/s/Heat-Guidelines.pdf",
+    "guidance": {
+      "green": "Normal activity with scheduled water/rest breaks: three 3-minute breaks per hour, or 10 minutes every 40 minutes.",
+      "yellow": "Increase breaks: three 4-minute breaks per hour, or 12 minutes every 40 minutes.",
+      "orange": "Training up to 2 hours with four 4-minute breaks per hour, or 10 minutes every 30 minutes.",
+      "red": "Training up to 1 hour, with four 4-minute breaks; no additional conditioning.",
+      "black": "Do not train outdoors; delay until cooler or cancel."
+    },
+    "regions": {
+      "1": {
+        "name": "Cooler-climate region 1",
+        "unit": "F",
+        "source": "https://www.recognizetorecover.org/s/Heat-Guidelines.pdf",
+        "minimums": {
+          "yellow": 76.1,
+          "orange": 81.1,
+          "red": 84.2,
+          "black": 86.2
+        }
+      },
+      "2": {
+        "name": "Moderate-climate region 2",
+        "unit": "F",
+        "source": "https://www.recognizetorecover.org/s/Heat-Guidelines.pdf",
+        "minimums": {
+          "yellow": 79.8,
+          "orange": 84.7,
+          "red": 87.8,
+          "black": 89.8
+        }
+      },
+      "3": {
+        "name": "Warmer-climate region 3",
+        "unit": "F",
+        "source": "https://www.recognizetorecover.org/s/Heat-Guidelines.pdf",
+        "minimums": {
+          "yellow": 82.1,
+          "orange": 87.1,
+          "red": 90.1,
+          "black": 92.0
+        }
+      }
+    },
+    "boundary_note": "Published chart gaps are conservatively assigned to the more cautious category. Stored minimums are inclusive (>=), including black; the source prints black as greater than its cutoff."
+  },
+  "workers": {
+    "name": "OSHA table adapted from NIOSH 2016 heat guidance",
+    "metric": "effective_wbgt",
+    "source": "https://www.osha.gov/heat-exposure/hazards",
+    "notes": "Screening limits, not automatic mandatory stop-work temperatures. Clothing adjustments, workload, rest schedules, and other factors must be considered.",
+    "workloads": {
+      "light": {
+        "unit": "C",
+        "source": "https://www.osha.gov/heat-exposure/hazards",
+        "limits": {
+          "unacclimatized": 28,
+          "acclimatized": 30
+        }
+      },
+      "moderate": {
+        "unit": "C",
+        "source": "https://www.osha.gov/heat-exposure/hazards",
+        "limits": {
+          "unacclimatized": 25,
+          "acclimatized": 28
+        }
+      },
+      "heavy": {
+        "unit": "C",
+        "source": "https://www.osha.gov/heat-exposure/hazards",
+        "limits": {
+          "unacclimatized": 23,
+          "acclimatized": 26
+        }
+      },
+      "very_heavy": {
+        "unit": "C",
+        "source": "https://www.osha.gov/heat-exposure/hazards",
+        "limits": {
+          "unacclimatized": 21,
+          "acclimatized": 25
+        }
+      }
+    },
+    "boundary_note": "At or above (>=) a screening limit triggers further assessment. Being below a limit does not guarantee safety."
+  }
+}

@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Flet and Vercel local folders
+.flet/
+.vercel/
+
+# Editor settings (contain local paths)
+.vscode/
