@@ -139,3 +139,17 @@
 - Claude's help: Upgraded certifi to 2026.10.19 (approved), re-checked all 59 pinned packages against the OSV database (no known vulnerabilities left), and confirmed the local web server still works. Redeployed the Day 4 commit from GitHub. Diagnosed the startup crash: storage.py doesn't catch the RuntimeError from a SharedPreferences timeout, so it should fall back to defaults. Reviewed the AI-assisted files again (planner.py, day4check.py, acclim.py, rules.py) and listed remaining issues in words only.
 - What I did: Approved the certifi upgrade; I'm fixing the storage crash myself.
 - Files Claude edited (if any): requirements.txt (certifi pin), pyproject.toml (certifi minimum version for Vercel), AI_LOG.md. Installed certifi==2026.10.19 in the firstheat env.
+
+## 2026-10-22: Emergency screen and developer mode (ChatGPT)
+- Tool: ChatGPT
+- Problem: Needed the Emergency mode (911, heat stroke steps, timer, EMS log) and a developer mode for simulated testing.
+- AI's help: Assisted with views/emergency.py and views/developer_mode.py (both marked "ASSISTED BY AI" in the files).
+- What I did: Checked the emergency wording against the CDC/NIOSH and KSI sources; added both screens to the app in main.py (Emergency tab, Home shortcut, developer mode inside Settings); fixed the storage startup crash in storage.py and the "Rest day" label in core/planner.py.
+- Files the AI wrote: parts of views/emergency.py and views/developer_mode.py.
+
+## 2026-10-22: Day 5 check
+- Tool: Claude Code
+- Problem: Asked Claude to check and push the Day 5 work.
+- Claude's help: Compiled every file; confirmed the Flet 1.0 APIs used exist (Button.action, CopyToClipboard, OpenUrl, Wakelock, HapticFeedback, an icon control in NavigationBar); ran developer mode on simulated cases (black, red, green, worker, invalid input); confirmed day4check now shows "Rest day"; checked the source links; confirmed the local web server builds the app. Explained in words only; did not edit app code.
+- What I did: Wrote the fixes and integration listed above.
+- Files Claude edited (if any): AI_LOG.md. Also ran git commit/push.

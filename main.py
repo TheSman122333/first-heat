@@ -7,6 +7,8 @@ from views.home import build_home
 from views.plan import build_plan
 from views.my_plan import build_my_plan
 from views.settings import build_settings
+from views.emergency import build_emergency
+from views.developer_mode import build_developer_mode
 
 
 async def main(page: ft.Page):
@@ -16,7 +18,7 @@ async def main(page: ft.Page):
     page.bgcolor = "#F8FAFC"
     page.padding = 20
 
-    #load saved settings
+    #load settings and attendance
     prefs = ft.SharedPreferences()
     settings = await load_settings(prefs)
 
@@ -35,23 +37,45 @@ async def main(page: ft.Page):
         await save_person(prefs, changes)
         person.update(changes)
 
-    #create pages
+    #build all screens
     home, refresh_home = build_home(page, settings)
     weekly, refresh_weekly = build_plan(page, settings)
-    my_plan, refresh_my_plan = build_my_plan(page, settings, person, update_person)
-    settings_page = build_settings(page, settings, update_settings)
+    my_plan, refresh_my_plan = build_my_plan(
+        page, settings, person, update_person
+    )
 
-    screens = [home, weekly, my_plan, settings_page]
+    emergency = build_emergency(page, settings)
+    settings_screen = build_settings(page, settings, update_settings)
+
+    #add developer mode to Settings
+    toggle, simulator = build_developer_mode(
+        page, settings, person
+    )
+
+    settings_screen.content.controls.extend([
+        ft.Divider(),
+        toggle,
+        simulator
+    ])
+
+    screens = [
+        home,
+        weekly,
+        my_plan,
+        emergency,
+        settings_screen
+    ]
+
     refreshers = {
         0: refresh_home,
         1: refresh_weekly,
         2: refresh_my_plan
     }
-    
-    #navigation
-    def navigate(event):
 
-        index = event.control.selected_index
+    #navigation
+    def go(index):
+
+        page.navigation_bar.selected_index = index
 
         page.controls.clear()
         page.add(screens[index])
@@ -59,6 +83,23 @@ async def main(page: ft.Page):
         if index in refreshers:
             page.run_task(refreshers[index])
 
+    def navigate(event):
+        go(event.control.selected_index)
+
+    #emergency shortcut on Home
+    home.content.controls.insert(
+        1,
+        ft.Button(
+            content="Emergency help — CALL 911 instructions",
+            icon=ft.Icons.WARNING,
+            color="#FFFFFF",
+            bgcolor="#B91C1C",
+            height=54,
+            on_click=lambda e: go(3)
+        )
+    )
+
+    #bottom navigation
     page.navigation_bar = ft.NavigationBar(
         selected_index=0,
         destinations=[
@@ -73,6 +114,13 @@ async def main(page: ft.Page):
             ft.NavigationBarDestination(
                 icon=ft.Icons.EVENT_NOTE_OUTLINED,
                 label="My plan"
+            ),
+            ft.NavigationBarDestination(
+                icon=ft.Icon(
+                    ft.Icons.WARNING,
+                    color="#B91C1C"
+                ),
+                label="Emergency"
             ),
             ft.NavigationBarDestination(
                 icon=ft.Icons.SETTINGS_OUTLINED,

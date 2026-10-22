@@ -57,7 +57,7 @@ async def load_settings(prefs):
         if saved:
             return check_settings(json.loads(saved))
 
-    except (ValueError, TypeError, KeyError, OverflowError, OSError):
+    except (ValueError, TypeError, KeyError, OverflowError, OSError, RuntimeError):
         pass
 
     return default_settings()
@@ -132,24 +132,34 @@ def check_person_data(person):
 #load attendance
 async def load_person(prefs):
 
-    saved = await prefs.get(PERSON_KEY)
+    #use defaults if browser storage isn't available
+    try:
+        saved = await prefs.get(PERSON_KEY)
+    except RuntimeError:
+        return default_person()
 
     if not saved:
         return default_person()
-
+    #check saved attendance before loading
     try:
         return check_person_data(json.loads(saved))
 
     except (ValueError, TypeError, KeyError) as error:
         raise ValueError(
-            "Saved attendance could not be read. Your data was not erased."
+            "Saved attendance could not be read. "
+            "Your data was not erased."
         ) from error
 
 
-#sav eattendance
+#save personal settings and attendance
 async def save_person(prefs, person):
 
     check_person_data(person)
 
-    if not await prefs.set(PERSON_KEY, json.dumps(person)):
-        raise RuntimeError("COULDN'T SAVE ATTENDANCE")
+    saved = await prefs.set(
+        PERSON_KEY,
+        json.dumps(person)
+    )
+
+    if saved is False:
+        raise RuntimeError("Could not save attendance.")

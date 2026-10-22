@@ -82,7 +82,7 @@ def project_week(profile, forecast, region):
             )
 
         else:
-
+            #calculate athlete practice limits
             plan = athlete_plan(
                 current_person,
                 when,
@@ -93,12 +93,15 @@ def project_week(profile, forecast, region):
             limit = plan["max_total_practice_minutes"]
             count = plan["max_practices"]
 
-            noun = "practice" if count == 1 else "practices"
+            if plan["rest_required"]:
+                summary = "Rest day"
 
-            summary = (
-                f"Day {plan['day']}: {count} {noun} "
-                f"· up to {limit} min"
-            )
+            elif count == 0:
+                summary = "No outdoor practice"
+
+            else:
+                noun = "practice" if count == 1 else "practices"
+                summary = f"Day {plan['day']}: {count} {noun} · up to {limit} min"
 
         completed = any(
             session.day == when
