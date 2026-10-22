@@ -119,9 +119,23 @@
 - What I did: Wrote the rest of the Day 4 work: the My plan screen (views/my_plan.py) with attendance, reset and validation, saving the person in storage.py, the Weekly tab and navigation changes in main.py, the scroll fix, WBGT labels, ZIP search wording, the Region 1 default, and daybyday/day4check.py. Fixed the projection myself so projected double-practice days are followed by single-practice days.
 - Files the AI wrote: parts of core/planner.py (project_week structure).
 
+## 2026-10-21: Day 4 check script (ChatGPT)
+- Tool: ChatGPT
+- Problem: Needed a print-only script to check the planner's Day 4 cases.
+- AI's help: Helped write daybyday/day4check.py (marked "AI USED" in the file).
+- What I did: Chose the cases and the expected values (new worker, worked yesterday, returning worker, orange forecast, new athlete, athlete day 6, rest day, after rest day) and ran it against my planner.
+- Files the AI wrote: parts of daybyday/day4check.py.
+
 ## 2026-10-21: Day 4 planning, scrolling bug and planner review
 - Tool: Claude Code
 - Problem: Planning the last days; screens couldn't scroll on some devices; questions about ZIP codes, automatic sports regions, and WBGT vs. heat index; asked Claude to check the planner.
 - Claude's help: Committed and pushed Day 3. Checked my pinned packages against the OSV vulnerability database (certifi 2026.10.18 has a critical advisory, fixed in 2026.10.19; upgrade not done yet). Helped re-plan the week (Group view replaced by the planner; calibration and Spanish cut). Diagnosed the scrolling bug (SafeArea needed expand=True). Tested that Open-Meteo search accepts ZIP codes. Advised against automatic regions (the official map has no data file) and suggested defaulting to the most cautious region. Pointed out that the screens didn't say the numbers are WBGT. Ran the planner on made-up forecasts and found that projected athlete days allowed a double practice every day, plus raw error messages and no way to undo attendance. Explained in words only; did not edit app code.
 - What I did: Made all the fixes and label changes myself.
 - Files Claude edited (if any): AI_LOG.md. Also ran git commit/push for Day 3 and Day 4.
+
+## 2026-10-22: Security alert fix and redeploy
+- Tool: Claude Code
+- Problem: GitHub reported a critical vulnerability: certifi 2026.10.18 included root certificates from an authority whose keys were compromised. Vercel logs also showed two visitors whose app never loaded (SharedPreferences.get timed out at startup).
+- Claude's help: Upgraded certifi to 2026.10.19 (approved), re-checked all 59 pinned packages against the OSV database (no known vulnerabilities left), and confirmed the local web server still works. Redeployed the Day 4 commit from GitHub. Diagnosed the startup crash: storage.py doesn't catch the RuntimeError from a SharedPreferences timeout, so it should fall back to defaults. Reviewed the AI-assisted files again (planner.py, day4check.py, acclim.py, rules.py) and listed remaining issues in words only.
+- What I did: Approved the certifi upgrade; I'm fixing the storage crash myself.
+- Files Claude edited (if any): requirements.txt (certifi pin), pyproject.toml (certifi minimum version for Vercel), AI_LOG.md. Installed certifi==2026.10.19 in the firstheat env.

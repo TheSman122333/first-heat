@@ -9,6 +9,7 @@ dependencies = [
     "lwbgt==1.2.1",
     "tzdata==2026.5",
     "websockets==17.3",
+    "certifi>=2026.10.19",
 ]
 
 [tool.vercel]
