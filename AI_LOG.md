@@ -153,3 +153,10 @@
 - Claude's help: Compiled every file; confirmed the Flet 1.0 APIs used exist (Button.action, CopyToClipboard, OpenUrl, Wakelock, HapticFeedback, an icon control in NavigationBar); ran developer mode on simulated cases (black, red, green, worker, invalid input); confirmed day4check now shows "Rest day"; checked the source links; confirmed the local web server builds the app. Explained in words only; did not edit app code.
 - What I did: Wrote the fixes and integration listed above.
 - Files Claude edited (if any): AI_LOG.md. Also ran git commit/push.
+
+## 2026-10-22: Day 5 deployment and live check
+- Tool: Claude Code
+- Problem: Needed the Day 5 version (Emergency, developer mode, storage fix) live for testers, without risking a broken site.
+- Claude's help: Before deploying, ran the app's web server locally with a stand-in browser client in two scenarios (browser storage failing the way the Vercel logs showed, and a normal new visitor) and confirmed the app starts and builds every screen in both. Deployed commit 0f270c9 from GitHub to firstheat.vercel.app, then opened a real session against the live site (Home showed live WBGT; all five tabs and the CALL 911 shortcut loaded) and confirmed Vercel showed no runtime errors.
+- What I did: Approved the deployment; sharing the link with coaches and athletes for feedback.
+- Files Claude edited (if any): AI_LOG.md. Test scripts were kept in Claude's scratch folder, outside the project.
