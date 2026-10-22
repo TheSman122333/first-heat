@@ -1,13 +1,16 @@
-
-"Save location and region using Flet preferences"
+"Save FirstHeat settings and acclimation details on the device"
 
 import json
 import math
+from datetime import date
 from zoneinfo import ZoneInfo
 
-KEY = "firstheat.settings.v1"
+
+SETTINGS_KEY = "firstheat.settings.v1"
+PERSON_KEY = "firstheat.me.v1"
 
 
+#location settings
 def default_settings():
     return {
         "name": "Detroit",
@@ -22,10 +25,10 @@ def default_settings():
 def check_settings(settings):
 
     if not isinstance(settings, dict):
-        raise ValueError("SETTINGS MUST BE AN OBJECT")
+        raise ValueError("INVALID SETTINGS")
 
     if settings.get("region") not in (1, 2, 3):
-        raise ValueError("SPORTS REIGON MUST BE 1, 2, OR 3")
+        raise ValueError("INVALID SPORTS REIGON")
 
     if not isinstance(settings.get("name"), str) or not settings["name"].strip():
         raise ValueError("CITY IS MISSING")
@@ -37,37 +40,116 @@ def check_settings(settings):
     longitude = float(settings["longitude"])
 
     if not math.isfinite(latitude) or not -90 <= latitude <= 90:
-        raise ValueError("INVALID LATITUDE")
+        raise ValueError("INVALID latitude")
 
     if not math.isfinite(longitude) or not -180 <= longitude <= 180:
-        raise ValueError("INVALID LONGITUDE")
+        raise ValueError("INVALID longitude")
 
     ZoneInfo(settings["timezone"])
-
     return settings
 
 
 async def load_settings(prefs):
-    "use detroit if there are no saved settings"
 
     try:
-        saved = await prefs.get(KEY)
+        saved = await prefs.get(SETTINGS_KEY)
 
         if saved:
             return check_settings(json.loads(saved))
 
-        return default_settings()
-
     except (ValueError, TypeError, KeyError, OverflowError, OSError):
-        return default_settings()
+        pass
+
+    return default_settings()
 
 
 async def save_settings(prefs, settings):
-    "save the current location and sports region"
 
     check_settings(settings)
 
-    saved = await prefs.set(KEY, json.dumps(settings))
+    if not await prefs.set(SETTINGS_KEY, json.dumps(settings)):
+        raise RuntimeError("Could not save settings")
+
+
+#personal settings
+def default_person():
+    return {
+        "role": "worker",
+        "experienced": False,
+        "normal_minutes": 480,
+        "sessions": []
+    }
+
+
+def check_person_data(person):
+
+    if not isinstance(person, dict):
+        raise ValueError("INVALID PERSON DATA")
+
+    if person.get("role") not in ("worker", "athlete"):
+        raise ValueError("INVALID ROLE")
+
+    if type(person.get("experienced")) is not bool:
+        raise ValueError("INVALID EXPERIENCE SETTING")
+
+    minutes = person.get("normal_minutes")
+
+    if type(minutes) is not int or not 1 <= minutes <= 1440:
+        raise ValueError("SHIFT MINUTES MUST BE IN BETWEEN 1 and 1440")
+
+    sessions = person.get("sessions")
+
+    if not isinstance(sessions, list):
+        raise ValueError("INVALID ATTENDANCE RECORDS")
+
+    for session in sessions:
+
+        if not isinstance(session, dict):
+            raise ValueError("INVALID ATTENDANCE RECORDS")
+
+        day = session.get("day")
+
+        if not isinstance(day, str) or date.fromisoformat(day).isoformat() != day:
+            raise ValueError("INVALID SESSION DATE")
+
+        if type(session.get("minutes")) is not int or not 1 <= session["minutes"] <= 1440:
+            raise ValueError("INVALID SESSION DURATION")
+
+        if person["role"] == "worker":
+            allowed = ("work",)
+        else:
+            allowed = ("practice", "walkthrough")
+
+        if session.get("kind") not in allowed:
+            raise ValueError("INVALID SESSION TYPE")
+
+        if type(session.get("heat_wave")) is not bool:
+            raise ValueError("INVALID HEAT-WAVE SETTING")
+
+    return person
+
+
+#load attendance
+async def load_person(prefs):
+
+    saved = await prefs.get(PERSON_KEY)
 
     if not saved:
-        raise RuntimeError("COULDN'T SAVE SETTINGS")
+        return default_person()
+
+    try:
+        return check_person_data(json.loads(saved))
+
+    except (ValueError, TypeError, KeyError) as error:
+        raise ValueError(
+            "Saved attendance could not be read. Your data was not erased."
+        ) from error
+
+
+#sav eattendance
+async def save_person(prefs, person):
+
+    check_person_data(person)
+
+    if not await prefs.set(PERSON_KEY, json.dumps(person)):
+        raise RuntimeError("COULDN'T SAVE ATTENDANCE")

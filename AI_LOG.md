@@ -111,3 +111,17 @@
 - Claude's help: Ran city search, today's summary and the 7-day plan for real cities (Phoenix and Honolulu) and built every screen without opening a window; checked the Flet 1.0 calls (SharedPreferences, Dropdown). Pointed out: the test-version note is still missing, raw error text is shown in three screens, there's no region reminder after changing city, the map link is unverified, core/today.py imports storage.py from outside core/, and the Plan shows a misleading message after 8 PM. Explained in words only; did not edit app code.
 - What I did: Disclosed my ChatGPT use for Day 3.
 - Files Claude edited (if any): AI_LOG.md.
+
+## 2026-10-21: Acclimatization planner, project_week (ChatGPT)
+- Tool: ChatGPT
+- Problem: Needed to combine the acclimatization engine with the 7-day forecast so each future day shows a projected limit.
+- AI's help: Helped structure project_week in core/planner.py (marked with a comment in the file).
+- What I did: Wrote the rest of the Day 4 work: the My plan screen (views/my_plan.py) with attendance, reset and validation, saving the person in storage.py, the Weekly tab and navigation changes in main.py, the scroll fix, WBGT labels, ZIP search wording, the Region 1 default, and daybyday/day4check.py. Fixed the projection myself so projected double-practice days are followed by single-practice days.
+- Files the AI wrote: parts of core/planner.py (project_week structure).
+
+## 2026-10-21: Day 4 planning, scrolling bug and planner review
+- Tool: Claude Code
+- Problem: Planning the last days; screens couldn't scroll on some devices; questions about ZIP codes, automatic sports regions, and WBGT vs. heat index; asked Claude to check the planner.
+- Claude's help: Committed and pushed Day 3. Checked my pinned packages against the OSV vulnerability database (certifi 2026.10.18 has a critical advisory, fixed in 2026.10.19; upgrade not done yet). Helped re-plan the week (Group view replaced by the planner; calibration and Spanish cut). Diagnosed the scrolling bug (SafeArea needed expand=True). Tested that Open-Meteo search accepts ZIP codes. Advised against automatic regions (the official map has no data file) and suggested defaulting to the most cautious region. Pointed out that the screens didn't say the numbers are WBGT. Ran the planner on made-up forecasts and found that projected athlete days allowed a double practice every day, plus raw error messages and no way to undo attendance. Explained in words only; did not edit app code.
+- What I did: Made all the fixes and label changes myself.
+- Files Claude edited (if any): AI_LOG.md. Also ran git commit/push for Day 3 and Day 4.

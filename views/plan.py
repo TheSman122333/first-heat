@@ -84,7 +84,7 @@ def build_plan(page, settings):
                                     size=17
                                 ),
                                 ft.Text(
-                                    f"Peak: {peak_f:.1f} °F · {level.title()}",
+                                    f"Peak: {peak_f:.1f} °F WBGT · {level.title()}",
                                     color=COLORS[level]
                                 ),
                                 ft.Text(window_text, size=14)
@@ -112,8 +112,7 @@ def build_plan(page, settings):
     refresh_button.on_click = refresh
 
     #plan layout
-    screen = ft.SafeArea(
-        content=ft.Column(
+    screen = ft.SafeArea(expand=True, content=ft.Column(
             controls=[
                 ft.Text(
                     "7-day training plan (Heat Forecast)",

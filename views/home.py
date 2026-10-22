@@ -37,7 +37,7 @@ def build_home(page, settings):
     hour = ft.Text("CURRENT HOUR", size=13)
 
     temperature = ft.Text(
-        "-- °F",
+        "-- °F WBGT ",
         size=48,
         weight=ft.FontWeight.BOLD
     )
@@ -149,11 +149,11 @@ def build_home(page, settings):
             background, ink = CARD_COLORS[level]
 
             hour.value = (
-                f"CURRENT HOUR · {today['current_time']:%I:%M %p}"
+                f"ESTIMATED WBGT · {today['current_time']:%I:%M %p}"
             )
 
             temperature.value = (
-                f"{today['current_wbgt'] * 9 / 5 + 32:.1f} °F"
+                f"{today['current_wbgt'] * 9 / 5 + 32:.1f} °F WBGT "
             )
 
             category.value = f"{level.title()} heat category"
@@ -176,7 +176,7 @@ def build_home(page, settings):
 
             #peak
             peak_text.value = (
-                f"{today['peak_wbgt'] * 9 / 5 + 32:.1f} °F "
+                f"{today['peak_wbgt'] * 9 / 5 + 32:.1f} °F WBGT "
                 f"at {today['peak_time']:%I:%M %p} "
                 f"· {today['peak_category'].title()}"
             )
@@ -207,8 +207,7 @@ def build_home(page, settings):
     refresh_button.on_click = refresh
 
     #home layout
-    screen = ft.SafeArea(
-        content=ft.Column(
+    screen = ft.SafeArea(expand=True, content=ft.Column(
             controls=[
                 ft.Text(
                     "FirstHeat",
@@ -233,6 +232,7 @@ def build_home(page, settings):
                 ),
                 ft.Text(
                     "Estimated WBGT, not an on-site measurement. "
+                    "WBGT combines temperature, humidity, sun and wind. It uses a different scale than air temperature or a weather app's 'feels like', so don't compare them. "
                     "Follow official guidance "
                     "(NATA/KSI, OSHA/NIOSH).",
                     size=12,

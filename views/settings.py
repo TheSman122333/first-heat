@@ -1,4 +1,3 @@
-
 "Settings: select city and sports region"
 
 import asyncio
@@ -7,7 +6,7 @@ import flet as ft
 from core.geocoding import search_cities
 
 
-KSI_MAP = "https://www.recognizetorecover.org/environmental"
+KSI_MAP = "https://www.recognizetorecover.org/s/Heat-Guidelines.pdf"
 
 
 def build_settings(page, settings, on_save):
@@ -17,8 +16,8 @@ def build_settings(page, settings, on_save):
 
     #city search
     search_box = ft.TextField(
-        label="Search a US city",
-        hint_text="Detroit"
+        label="City or ZIP code",
+        hint_text="Detroit or 48226"
     )
 
     message = ft.Text("", color="#64748B")
@@ -51,22 +50,31 @@ def build_settings(page, settings, on_save):
 
         region.value = str(settings["region"])
 
+    #save city and default to region 1
     async def choose_city(city):
 
-        updated = {**settings, **city}
-
         try:
-            await on_save(updated)
+            await on_save({
+                **settings,
+                **city,
+                "region": 1
+            })
 
             update_location()
-            message.value = f"Saved {city['name']}, {city['state']}"
+
+            message.value = (
+                "Location saved. Using Region 1 (most cautious) "
+                "until you choose your region from the map."
+            )
+
             results.controls.clear()
 
-        except Exception as exc:
-            message.value = f"Could not save city: {exc}"
+        except Exception as error:
+            message.value = f"Could not save location: {error}"
 
         page.update()
 
+    #search for cities
     async def search(_event=None):
 
         search_button.disabled = True
@@ -113,6 +121,7 @@ def build_settings(page, settings, on_save):
             search_button.disabled = False
             page.update()
 
+    #save chosen sports region
     async def select_region(_event=None):
 
         try:
@@ -125,6 +134,7 @@ def build_settings(page, settings, on_save):
 
         except Exception as exc:
             message.value = f"Could not save region: {exc}"
+            region.value = str(settings["region"])
 
         page.update()
 
@@ -136,6 +146,7 @@ def build_settings(page, settings, on_save):
 
     #settings layout
     screen = ft.SafeArea(
+        expand=True,
         content=ft.Column(
             controls=[
                 ft.Text(
@@ -165,10 +176,9 @@ def build_settings(page, settings, on_save):
                     url=KSI_MAP
                 ),
                 ft.Text(
-                    "Regions cross state lines. Check the map before "
-                    "choosing; changing cities does not pick a new "
-                    "region automatically. School and state rules "
-                    "may be stricter.",
+                    "New locations default to Region 1. "
+                    "Check the map to find your actual region. "
+                    "School and state rules may be stricter.",
                     color="#64748B",
                     size=12
                 )

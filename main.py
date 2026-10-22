@@ -2,9 +2,10 @@
 
 import flet as ft
 
-from storage import load_settings, save_settings
+from storage import load_settings, save_settings, load_person, save_person
 from views.home import build_home
 from views.plan import build_plan
+from views.my_plan import build_my_plan
 from views.settings import build_settings
 
 
@@ -19,22 +20,34 @@ async def main(page: ft.Page):
     prefs = ft.SharedPreferences()
     settings = await load_settings(prefs)
 
-    async def update_settings(changes):
+    try:
+        person = await load_person(prefs)
+    except ValueError as error:
+        page.add(ft.Text(str(error), color="#991B1B"))
+        return
 
+    #save changes
+    async def update_settings(changes):
         await save_settings(prefs, changes)
         settings.update(changes)
 
-    #create screens (preload)
+    async def update_person(changes):
+        await save_person(prefs, changes)
+        person.update(changes)
+
+    #create pages
     home, refresh_home = build_home(page, settings)
-    plan, refresh_plan = build_plan(page, settings)
-    setting_screen = build_settings(page, settings, update_settings)
+    weekly, refresh_weekly = build_plan(page, settings)
+    my_plan, refresh_my_plan = build_my_plan(page, settings, person, update_person)
+    settings_page = build_settings(page, settings, update_settings)
 
-    screens = [
-        home,
-        plan,
-        setting_screen
-    ]
-
+    screens = [home, weekly, my_plan, settings_page]
+    refreshers = {
+        0: refresh_home,
+        1: refresh_weekly,
+        2: refresh_my_plan
+    }
+    
     #navigation
     def navigate(event):
 
@@ -43,11 +56,8 @@ async def main(page: ft.Page):
         page.controls.clear()
         page.add(screens[index])
 
-        if index == 0:
-            page.run_task(refresh_home)
-
-        elif index == 1:
-            page.run_task(refresh_plan)
+        if index in refreshers:
+            page.run_task(refreshers[index])
 
     page.navigation_bar = ft.NavigationBar(
         selected_index=0,
@@ -58,7 +68,11 @@ async def main(page: ft.Page):
             ),
             ft.NavigationBarDestination(
                 icon=ft.Icons.CALENDAR_MONTH,
-                label="Plan"
+                label="Weekly"
+            ),
+            ft.NavigationBarDestination(
+                icon=ft.Icons.EVENT_NOTE_OUTLINED,
+                label="My plan"
             ),
             ft.NavigationBarDestination(
                 icon=ft.Icons.SETTINGS_OUTLINED,
