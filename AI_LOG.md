@@ -1,5 +1,16 @@
 # AI Use Log
 
+## Summary (updated 2026-10-24)
+
+This repository has two stages. The dated entries below give the details.
+
+1. **Days 1–5 (Oct 19–22, commits up to 04ec278): the original FirstHeat.** I built this stage. ChatGPT wrote data/rules.json and most of core/rules.py, and helped with parts of core/acclim.py, core/planner.py, views/emergency.py, views/developer_mode.py and the check scripts. Claude Code helped with debugging, reviews, environment and tooling, and deployment. Each entry lists exactly what the AI wrote.
+2. **Revamp (Oct 22–23, every commit after 04ec278): written by Claude Code.** Claude Code wrote the redesigned interface and the new features: the new Home, Forecast and My Plan screens, the activity tracker with break reminders, the current conditions tiles, the on-site reading features, the logo, and the safety disclaimer and legal text. I directed the design and features and reviewed each change on the live site. I did not write the revamp code. Git shows these commits with "Claude" as the author.
+
+What stayed the same from stage 1: the WBGT calculation (core/wbgt.py), the weather fetch (core/weather.py), the acclimatization engine (core/acclim.py), the 7-day planner (core/planner.py), city search (core/geocoding.py), and the heat thresholds in data/rules.json. The revamp only added to core/rules.py, core/today.py, core/plan.py, storage.py and data/rules.json; it did not change the existing logic or numbers.
+
+Size of the revamp (git diff from 04ec278 to af7444f): the Python code grew from about 2,900 to about 6,500 lines, and Claude Code added about 4,100 of those lines. In views/, about 3,700 of the 4,700 lines are Claude Code's. In core/, about 240 of the 1,440 lines are Claude Code's (all of core/conditions.py plus small additions). These counts are approximate, since blank lines and moved lines count as changes.
+
 ## 2026-10-19: Flet crash from wrong Python environment; Day 1 scaffolding
 - Tool: Claude Code
 - Problem: Running main.py crashed with "TypeError: FastAPI.__init__() got an unexpected keyword argument 'openapi_prefix'".
@@ -160,3 +171,66 @@
 - Claude's help: Before deploying, ran the app's web server locally with a stand-in browser client in two scenarios (browser storage failing the way the Vercel logs showed, and a normal new visitor) and confirmed the app starts and builds every screen in both. Deployed commit 0f270c9 from GitHub to firstheat.vercel.app, then opened a real session against the live site (Home showed live WBGT; all five tabs and the CALL 911 shortcut loaded) and confirmed Vercel showed no runtime errors.
 - What I did: Approved the deployment; sharing the link with coaches and athletes for feedback.
 - Files Claude edited (if any): AI_LOG.md. Test scripts were kept in Claude's scratch folder, outside the project.
+
+## 2026-10-22: Revamp repository and new Vercel project
+- Tool: Claude Code
+- Problem: Wanted to try a large redesign that changes the app's focus without risking the working app at firstheat.vercel.app.
+- Claude's help: Copied the project at commit 04ec278 into a new repository (TheSman122333/firstheatrevamp) and a new Vercel project (firstheatrevamp.vercel.app). The original repository and site were not changed. Replaced CLAUDE.md with notes for this repository that allow Claude to write app code here.
+- What I did: Asked for the copy, chose to let Claude write the interface code in this repository, and decided to stop adding AI log entries during the redesign (this summary and the entries below make up for that).
+- Files Claude wrote or edited: CLAUDE.md.
+
+## 2026-10-22 to 2026-10-23: Interface redesign
+- Tool: Claude Code
+- Problem: Wanted a more visual, easier-to-read app.
+- Claude's help: Wrote the code for every change I asked for:
+  - Logo, two-tone wordmark and tagline ("Your adaptive heat-safety planner").
+  - Home: a large heat-stress number colored by category, with an activity illustration behind it; an hourly 6 AM–10 PM chart in the category colors; the emergency button shown only for Orange, Red and Black.
+  - Simulate a Session moved to Home, with color sliders, an intensity setting and a visual result report.
+  - Forecast tab: graphical 7-day bars and a chart for each day.
+  - My Plan: interactive redesign with profile sliders, a tappable 7-day bar chart with dates and done check marks, and a dial for each day.
+  - Brand header on Emergency and Settings, and a full-width CALL 911 button.
+  - Time zone labels; Open-Meteo and guideline links moved to Settings.
+- What I did: Described each change in my own words, reviewed it on the live site, and asked for adjustments.
+- Files Claude wrote or edited: views/home.py (most of the current file), views/plan.py (most), views/my_plan.py (most), views/developer_mode.py (most), views/emergency.py, views/settings.py, main.py; new files views/brand.py, views/peak_chart.py and views/sliders.py; assets/ (logo and icons drawn by Claude; activity illustrations from unDraw, license in assets/activity/LICENSE.md); app.py (assets folder); core/today.py and core/plan.py (also return each hour's values and the region's thresholds for the charts).
+
+## 2026-10-23: Safety disclaimer and About & legal
+- Tool: Claude Code
+- Problem: Asked what terms and privacy statements an app like this should have, then asked for a first-launch disclaimer and an About & legal section.
+- Claude's help: Recommended what to include, then wrote the disclaimer, privacy notice, terms of use and credits, the first-launch dialog, and saving the accepted version on the device.
+- What I did: Asked for the text and set the effective year to 2026. This is not legal advice; I still need to review the wording.
+- Files Claude wrote or edited: views/legal.py (new), views/settings.py, main.py, storage.py (load_disclaimer, save_disclaimer).
+
+## 2026-10-23: On-site WBGT reading and "could be higher" flags
+- Tool: Claude Code
+- Problem: Wanted users to enter an on-site WBGT meter reading in place of the estimate, and wanted estimates within about 1°F of the next category flagged.
+- Claude's help: Wrote the reading card on Home (32–120°F, expires after 60 minutes), the could-be-higher check, and the flags on Home and Forecast. Later made the reading also shift today's chart and peak by its difference from the estimate.
+- What I did: Asked for these features and reviewed them.
+- Files Claude wrote or edited: core/rules.py (next_category_if_close), data/rules.json (caution_margin_f and caution_note), views/home.py, views/plan.py.
+
+## 2026-10-23: Activity tracker with break reminders
+- Tool: Claude Code
+- Problem: Wanted My Plan to time today's activity, sound a break reminder at the recommended interval that lasts 30 seconds, count taken vs. ignored reminders, and show them on the day's dial.
+- Claude's help: Wrote the tracker card (timer, progress against today's limit, reminders with a sound and vibration, taken/missed counts) and saving so a reconnect can resume. Set the reminder spacing from the existing guidance text in rules.json: three breaks per hour means one every 20 minutes, four per hour means one every 15 minutes. Added the green logged band and the green/red reminder dots to the dial. Later fixed a server error when the browser tab closed while the timer was running.
+- What I did: Asked for the feature, tested it on the live site, and asked for the dot placement.
+- Files Claude wrote or edited: views/tracker.py (new), views/my_plan.py, storage.py (tracker saving and the optional reminder counts on logged days), core/rules.py (break_schedule), data/rules.json (break_schedule and break_note), assets/index.html and assets/reminder-sound.js (new; play the sound in the browser).
+
+## 2026-10-23: Demo reminder settings (temporary)
+- Tool: Claude Code
+- Problem: Needed to demo reminders without waiting 15–20 minutes.
+- Claude's help: Added a "Reminder settings (DEMO)" card in Settings to set the reminder interval (15 seconds to 20 minutes), break length, and how long a reminder stays up.
+- What I did: Asked for it for my demo; it is temporary and will be removed.
+- Files Claude wrote or edited: views/demo_reminders.py (new), views/settings.py, views/tracker.py.
+
+## 2026-10-23: Current conditions tiles, heat stress label, city and time zone
+- Tool: Claude Code
+- Problem: Wanted air temperature, humidity, UV index and air quality under the heat-stress number; the city name in the tile; the time zone next to the time; and clearer wording than "WBGT".
+- Claude's help: Wrote core/conditions.py (Open-Meteo forecast and air-quality data for the current hour, EPA UV and AQI levels) and the four tiles. Changed the label to "Heat stress (WBGT)" with the time zone. Renamed "Today's peak" to "Today's WBGT index". Removed the SIMULATED labels and the Run simulation button from Simulate a Session. Added credits for Copernicus CAMS and the EPA scales.
+- What I did: Asked for these changes, chose the wording and colors, and reviewed them.
+- Files Claude wrote or edited: core/conditions.py (new), views/home.py, views/developer_mode.py, views/legal.py.
+
+## 2026-10-23 to 2026-10-24: Explanations and AI-use review
+- Tool: Claude Code
+- Problem: Questions: what makes up WBGT; how much of the code is reused vs. AI-written; whether the revamp backend matches the original; whether the revamp can be submitted under the Congressional App Challenge AI rules.
+- Claude's help: Explained the three WBGT parts (natural wet bulb, black globe and air temperature, weighted 0.7 / 0.2 / 0.1) and how my wbgt.py estimates them with lwbgt. Measured the AI-written share of the code. Compared this repository with the original (the calculation files are identical; the rest are additions). Looked up the 2026 CAC rules on AI use (full disclosure, AI supports specific aspects and is not the entirety of the work, students explain their contributions and understand how the project and its code work). Wrote this summary and the revamp entries.
+- What I did: Decided to submit this repository and asked Claude to update this log.
+- Files Claude wrote or edited: AI_LOG.md.
