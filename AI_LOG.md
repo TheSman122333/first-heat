@@ -234,3 +234,10 @@ Size of the revamp (git diff from 04ec278 to af7444f): the Python code grew from
 - Claude's help: Explained the three WBGT parts (natural wet bulb, black globe and air temperature, weighted 0.7 / 0.2 / 0.1) and how my wbgt.py estimates them with lwbgt. Measured the AI-written share of the code. Compared this repository with the original (the calculation files are identical; the rest are additions). Looked up the 2026 CAC rules on AI use (full disclosure, AI supports specific aspects and is not the entirety of the work, students explain their contributions and understand how the project and its code work). Wrote this summary and the revamp entries.
 - What I did: Decided to submit this repository and asked Claude to update this log.
 - Files Claude wrote or edited: AI_LOG.md.
+
+## 2026-10-25: Cover image
+- Tool: Claude Code
+- Problem: Needed a 600x800 JPEG cover image for the Congressional App Challenge submission.
+- Claude's help: Designed the cover: the FirstHeat logo, name and tagline, three feature highlights, and a phone showing a screenshot of this app's Home screen. The screenshot was taken from the app running locally with sample weather data, because the session couldn't reach the live weather service.
+- What I did: Asked for the cover and chose to show this repository's version of the app.
+- Files Claude wrote or edited: AI_LOG.md. The cover image itself is not in the repository.
