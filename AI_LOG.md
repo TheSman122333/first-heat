@@ -1,15 +1,31 @@
 # AI Use Log
 
-## Summary (updated 2026-10-24)
+## Summary (updated 2026-10-25)
 
-This repository has two stages. The dated entries below give the details.
+FirstHeat was built in two stages. The dated entries below give the details.
 
-1. **Days 1–5 (Oct 19–22, commits up to 04ec278): the original FirstHeat.** I built this stage. ChatGPT wrote data/rules.json and most of core/rules.py, and helped with parts of core/acclim.py, core/planner.py, views/emergency.py, views/developer_mode.py and the check scripts. Claude Code helped with debugging, reviews, environment and tooling, and deployment. Each entry lists exactly what the AI wrote.
-2. **Revamp (Oct 22–23, every commit after 04ec278): written by Claude Code.** Claude Code wrote the redesigned interface and the new features: the new Home, Forecast and My Plan screens, the activity tracker with break reminders, the current conditions tiles, the on-site reading features, the logo, and the safety disclaimer and legal text. I directed the design and features and reviewed each change on the live site. I did not write the revamp code. Git shows these commits with "Claude" as the author.
+**My work in the core files (Stage 1).** I wrote most of FirstHeat's core, and these files are unchanged in the redesign:
+- core/wbgt.py: the hourly WBGT estimate, using the lwbgt library (Liljegren method) with UTC time handling.
+- core/weather.py: Open-Meteo forecast and archive requests, with input checks and error handling.
+- core/acclim.py: the acclimatization engine: Person and Session data, the NIOSH schedules for new and experienced workers, heat-wave counting and the stricter-limit rule, athlete practice limits and regional heat caps, and the plan dispatcher. I found and fixed the returning-athlete bug. (ChatGPT helped with break detection, the athlete day logic and input checks.)
+- core/planner.py: today's limit and the projected limits beside the 7-day forecast, including the rest-day and double-practice fixes. (ChatGPT helped structure project_week.)
+- core/today.py and core/plan.py: today's local hours, current hour and peak; seven local days and lower-heat windows.
+- core/geocoding.py: US city and ZIP code search.
+- storage.py and main.py: saved settings and attendance with validation, the startup storage fix, and navigation.
+- The first versions of the Home, Settings, Plan, My plan, Emergency and developer screens, and the day-by-day check scripts (with the AI help listed in their entries).
 
-What stayed the same from stage 1: the WBGT calculation (core/wbgt.py), the weather fetch (core/weather.py), the acclimatization engine (core/acclim.py), the 7-day planner (core/planner.py), city search (core/geocoding.py), and the heat thresholds in data/rules.json. The revamp only added to core/rules.py, core/today.py, core/plan.py, storage.py and data/rules.json; it did not change the existing logic or numbers.
+Today about 1,190 of the 1,436 lines in core/ are Stage 1 code (including the ChatGPT parts listed in the entries).
 
-Size of the revamp (git diff from 04ec278 to af7444f): the Python code grew from about 2,900 to about 6,500 lines, and Claude Code added about 4,100 of those lines. In views/, about 3,700 of the 4,700 lines are Claude Code's. In core/, about 240 of the 1,440 lines are Claude Code's (all of core/conditions.py plus small additions). These counts are approximate, since blank lines and moved lines count as changes.
+1. **Stage 1, Days 1–5 (Oct 19–22, commits up to 04ec278): the core app.** I built this stage. ChatGPT wrote data/rules.json and most of core/rules.py, and helped with parts of core/acclim.py, core/planner.py, views/emergency.py, views/developer_mode.py and the check scripts. Claude Code helped with debugging, reviews, environment and tooling, and deployment. Each entry lists exactly what the AI wrote.
+2. **Stage 2, interface redesign (Oct 22–25, every commit after 04ec278): code written by Claude Code, directed by me.** This stage redesigned the interface and added features on top of my Stage 1 app. It did not replace or rewrite my work. I decided what to change and how each screen should look and read, described each change, and reviewed it on the live site. Claude Code wrote the code: the redesigned Home, Forecast and My Plan screens, the activity tracker with break reminders, the current conditions tiles, the on-site reading features, the logo, and the safety disclaimer and legal text. Git shows these commits with "Claude" as the author.
+
+All of my Stage 1 work is kept. Claude Code did not write or change the core calculations; its additions to core/ are only the data the new features needed (core/conditions.py, and small helper functions in core/rules.py, core/today.py and core/plan.py). What stayed the same from stage 1: the WBGT calculation (core/wbgt.py), the weather fetch (core/weather.py), the acclimatization engine (core/acclim.py), the 7-day planner (core/planner.py), city search (core/geocoding.py), and the heat thresholds in data/rules.json. The redesign only added to core/rules.py, core/today.py, core/plan.py, storage.py and data/rules.json; it did not change the existing logic or numbers.
+
+Size of the redesign (git diff from 04ec278 to af7444f): in core/, about 240 of the 1,440 lines are Claude Code's (all of core/conditions.py plus small additions). In views/, the interface, about 3,700 of the 4,700 lines are Claude Code's. In total the Python code grew from about 2,900 to about 6,500 lines. These counts are approximate, since blank lines and moved lines count as changes.
+
+## Commit history
+- **Stage 1: 6 commits (Oct 21–22, 8f12a56 to 04ec278), author swqg-messiah (me).** They are the same commits as in my Day 1–5 repository (TheSman122333/firstheat). They also list "Co-Authored-By: Claude" because Claude Code ran the git commands for me and edited the setup files named in the entries below; the app code in them is mine, apart from the ChatGPT parts listed.
+- **Stage 2: one commit per redesign change (Oct 22–25), author "Claude", starting right after 04ec278.**
 
 ## 2026-10-19: Flet crash from wrong Python environment; Day 1 scaffolding
 - Tool: Claude Code
@@ -172,11 +188,11 @@ Size of the revamp (git diff from 04ec278 to af7444f): the Python code grew from
 - What I did: Approved the deployment; sharing the link with coaches and athletes for feedback.
 - Files Claude edited (if any): AI_LOG.md. Test scripts were kept in Claude's scratch folder, outside the project.
 
-## 2026-10-22: Revamp repository and new Vercel project
+## 2026-10-22: Redesign repository and Vercel project
 - Tool: Claude Code
-- Problem: Wanted to try a large redesign that changes the app's focus without risking the working app at firstheat.vercel.app.
-- Claude's help: Copied the project at commit 04ec278 into a new repository (TheSman122333/firstheatrevamp) and a new Vercel project (firstheatrevamp.vercel.app). The original repository and site were not changed. Replaced CLAUDE.md with notes for this repository that allow Claude to write app code here.
-- What I did: Asked for the copy, chose to let Claude write the interface code in this repository, and decided to stop adding AI log entries during the redesign (this summary and the entries below make up for that).
+- Problem: Wanted to redesign the app's interface and add features without risking the working Day 5 app.
+- Claude's help: Copied the project at commit 04ec278 into a new repository (now TheSman122333/first-heat) and a new Vercel project (now first-heat.vercel.app). The Day 1–5 repository was not changed. From here on, Claude Code wrote the interface and new-feature code in this repository; my core files stayed as they were.
+- What I did: Asked for the copy and decided to have Claude Code write the redesign code from my directions. The redesign entries below were written on 2026-10-24 from the commit history.
 - Files Claude wrote or edited: CLAUDE.md.
 
 ## 2026-10-22 to 2026-10-23: Interface redesign
@@ -230,8 +246,8 @@ Size of the revamp (git diff from 04ec278 to af7444f): the Python code grew from
 
 ## 2026-10-23 to 2026-10-24: Explanations and AI-use review
 - Tool: Claude Code
-- Problem: Questions: what makes up WBGT; how much of the code is reused vs. AI-written; whether the revamp backend matches the original; whether the revamp can be submitted under the Congressional App Challenge AI rules.
-- Claude's help: Explained the three WBGT parts (natural wet bulb, black globe and air temperature, weighted 0.7 / 0.2 / 0.1) and how my wbgt.py estimates them with lwbgt. Measured the AI-written share of the code. Compared this repository with the original (the calculation files are identical; the rest are additions). Looked up the 2026 CAC rules on AI use (full disclosure, AI supports specific aspects and is not the entirety of the work, students explain their contributions and understand how the project and its code work). Wrote this summary and the revamp entries.
+- Problem: Questions: what makes up WBGT; how much of the code is reused vs. AI-written; whether the redesign's backend matches the Day 5 version; how the Congressional App Challenge AI rules apply.
+- Claude's help: Explained the three WBGT parts (natural wet bulb, black globe and air temperature, weighted 0.7 / 0.2 / 0.1) and how my wbgt.py estimates them with lwbgt. Measured the AI-written share of the code. Compared this repository with the Day 1–5 version (the calculation files are identical; the rest are additions). Looked up the 2026 CAC rules on AI use (full disclosure, AI supports specific aspects and is not the entirety of the work, students explain their contributions and understand how the project and its code work). Wrote this summary and the redesign entries.
 - What I did: Decided to submit this repository and asked Claude to update this log.
 - Files Claude wrote or edited: AI_LOG.md.
 
@@ -241,3 +257,10 @@ Size of the revamp (git diff from 04ec278 to af7444f): the Python code grew from
 - Claude's help: Designed the cover: the FirstHeat logo, name and tagline, three feature highlights, and a phone showing a screenshot of this app's Home screen. The screenshot was taken from the app running locally with sample weather data, because the session couldn't reach the live weather service.
 - What I did: Asked for the cover and chose to show this repository's version of the app.
 - Files Claude wrote or edited: AI_LOG.md. The cover image itself is not in the repository.
+
+## 2026-10-25: Cleanup before submission
+- Tool: Claude Code
+- Problem: Getting the repository ready to submit.
+- Claude's help: Updated CLAUDE.md, renamed the Vercel project and moved the site to first-heat.vercel.app (the old addresses redirect there), and updated this log.
+- What I did: Chose the new name, renamed the GitHub repository, and reviewed this log.
+- Files Claude wrote or edited: CLAUDE.md, AI_LOG.md.

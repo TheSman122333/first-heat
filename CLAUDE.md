@@ -1,11 +1,12 @@
-# CLAUDE.md: FirstHeat Revamp
+# CLAUDE.md: FirstHeat
 
-UI sandbox copied from `TheSman122333/firstheat` (commit 04ec278). Used for mockups and large UI edits that shift the app's focus.
+FirstHeat is an adaptive heat-safety planner for people who are new to the heat. Days 1–5 (through commit 04ec278) built the core app; later commits are the redesign. AI_LOG.md records all AI use.
 
 ## Rules
-- Any file can be edited: `views/`, `main.py`, `core/`, `data/`, styling. No AI-use restrictions and no AI_LOG entries needed here.
-- Never push to or change the original repo (`TheSman122333/firstheat`) or the original Vercel project `firstheat` (firstheat.vercel.app).
-- Deploys: Vercel project `firstheatrevamp` -> https://firstheatrevamp.vercel.app, linked to this repo. Pushes trigger deploys.
+- Claude Code works on the interface and new features only. Don't change the calculation files (core/wbgt.py, core/weather.py, core/acclim.py, core/planner.py, core/geocoding.py) without asking.
+- Log every AI-assisted change in AI_LOG.md (what the AI wrote, what I did, and which files changed).
+- Keep the Day 1–5 repository (`TheSman122333/firstheat`) unchanged. Its old address, firstheat.vercel.app, redirects to first-heat.vercel.app.
+- Deploys: Vercel project `first-heat` -> first-heat.vercel.app, linked to this repo. Pushes trigger deploys.
 
 ## Stack notes
 - Python 3.12, Flet 1.0.4. Use `ft.run(main)`, not the old `ft.app(target=main)`.
